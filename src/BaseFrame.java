@@ -11,7 +11,7 @@ class StoneDraw implements MouseListener {
 
     JPanel contentPane = null;
     static final int STONE_SIZE = 25;
-    Color StoneColor = Color.white;  // CPU is white
+    Color StoneColor = Color.black;  // CPU is Black
 
     int scoreB = 0;
     int scoreW = 0;
@@ -27,56 +27,130 @@ class StoneDraw implements MouseListener {
                 OmockBoard[i][j] = -1;
             }
         }
+        OmockBoard[7][7] = 1;
     }
 
     public int scoreVarEstimation(int x, int y, int c){
         int scoreVar = 0;
 
-        /**
-         * 1. 점수 누적 방식 (중복연산)
-         * 2: 20, 3: 50, 4: 90, 5: 140
-         */
-        /*//
-        for(int i = 2; i <= 5; i++){
-            if(checkNinLine(x, y, c, i) > 0) scoreVar += (i * 10);
-        }
-        //*/
+        if(checkNinLine(x, y, c, 5) > 0) scoreVar = 100_000_000;
 
-        /**
-         * 2. 개별 점수 방식 (중복연산 x)
-         */
-        /*//
-        if(checkNinLine(x, y, c, 5) > 0){
-            scoreVar += 120;
-        }
-        else if(checkNinLine(x, y, c, 4) > 0) scoreVar += 100;
-        else if(checkNinLine(x, y, c, 3) > 0) scoreVar += 80;
-        else if(checkNinLine(x, y, c, 2) > 0) scoreVar += 60;
-        //*/
+        int[][] scores = {
+                {0, 0, 10, 10000, 50000},
+                {0, 0, 20, 15000, 52500}
+        };
 
-        /**
-         * 3. 점수 반환 방식 (줄을 계산하여 true/false가 아니라 줄의 개수를 반환)
-         */
         for(int i = 2; i < 5; i++){
-            scoreVar = (checkNinLine(x, y, c, i) - check1BlockedNinLine(x, y, c, i, 1) - check1BlockedNinLine(x, y, c, i, 2)) * i * 10;
-            scoreVar += check1BlockedNinLine(x, y, c, i, 1) * i * 3;
+            int oneBlockedLine = checkBlockedNinLineWithBlank(x, y, c, i, 1);
+            int freeLine = checkBlockedNinLineWithBlank(x, y, c, i, 0);
+
+            if(freeLine > 0) scoreVar += freeLine * scores[c][i];
+            if(oneBlockedLine > 0) scoreVar += oneBlockedLine * (scores[c][i] / 2);
         }
 
-        if( // 3-3 일 경우,
-            checkNinLine(x, y, c, 3) == 2 &&
-            check1BlockedNinLine(x, y, c, 3, 1) + check1BlockedNinLine(x, y, c, 3, 2) == 0
-        ) scoreVar = 100000;
-        // TODO: 열리고 띄어진 3, 4 등 어떻게 처리할 것인가?
-
-        if(checkNinLine(x, y, c, 5) >= 1)
-            scoreVar = checkNinLine(x, y, c, 5) * 1000000;
+        // 3-3일 경우,
+//        if(checkNinLine(x, y, c, 3) == 2
+//            && checkBlockedNinLine(x, y, c, 3, 1) + checkBlockedNinLine(x, y, c, 3, 2) == 0
+//        ) scoreVar = 100000;
+//        if(checkNinLineWithBlank(x, y, c, 3) == 2
+//                && checkBlockedNinLineWithBlank(x, y, c, 3, 1) + checkBlockedNinLineWithBlank(x, y, c, 3, 2) == 0
+//        ) scoreVar = 100000;
 
         return scoreVar;
     }
 
+    class P{
+        public int i = -1;
+        public int j = -1;
+        int MAX = Integer.MIN_VALUE;
+        int MIN = Integer.MAX_VALUE;
+
+        public P(int _i, int _j) {
+            i = _i; j = _j;
+        }
+        public P(){}
+    }
+
+    public P GameTree(int c, int limit){
+        return getPositionForMax(c, limit, 0);
+    }
+
+    private P getPositionForMax(int c, int limit, int curScore) {
+        P r_val = new P();
+
+        if(limit == 0){
+            r_val.MAX = curScore;
+            return r_val;
+        }
+
+        for(int i = 0; i < 15; i++){
+            for(int j = 0; j < 15; j++){
+                if(this.OmockBoard[i][j] == -1){
+                    this.OmockBoard[i][j] = c;
+
+                    if(checkNinLine(i, j, OmockBoard[i][j], 5) > 0){
+                        r_val.MAX = scoreVarEstimation(i, j, c); // - scoreVarEstimation(i, j, 1-c);
+                        r_val.i = i;
+                        r_val.j = j;
+                        this.OmockBoard[i][j] = -1;
+
+                        return r_val;
+                    }
+
+                    P temp = getPositionForMin(1 - c, limit-1, scoreVarEstimation(i, j, c));
+
+                    if(r_val.MAX < temp.MIN){
+                        r_val.MAX = temp.MIN;
+                        r_val.i = i;
+                        r_val.j = j;
+                    }
+                    this.OmockBoard[i][j] = -1;
+                }
+            }
+        }
+
+        return r_val;
+    }
+
+    private P getPositionForMin(int c, int limit, int curScore) {
+        P r_val = new P();
+
+        if(limit == 0){
+            r_val.MIN = curScore;
+            return r_val;
+        }
+
+        for(int i = 0; i < 15; i++){
+            for(int j = 0; j < 15; j++){
+                if(this.OmockBoard[i][j] == -1){
+                    this.OmockBoard[i][j] = c;
+
+                    if(checkNinLine(i, j, OmockBoard[i][j], 5) > 0){
+                        r_val.MIN = curScore - scoreVarEstimation(i, j, c); // - scoreVarEstimation(i, j, 1-c);
+                        r_val.i = i;
+                        r_val.j = j;
+                        this.OmockBoard[i][j] = -1;
+
+                        return r_val;
+                    }
+
+                    P temp = getPositionForMax(1 - c, limit-1, curScore - scoreVarEstimation(i, j, c));
+
+                    if(r_val.MIN > temp.MAX){
+                        r_val.MIN = temp.MAX;
+                        r_val.i = i;
+                        r_val.j = j;
+                    }
+                    this.OmockBoard[i][j] = -1;
+                }
+            }
+        }
+
+        return r_val;
+    }
+
     public void AIStoneDraw() {
         int color = 0;
-        int i = 0, j = 0;
 
         if(StoneColor.equals(Color.BLACK)) {
             StoneColor = Color.white;
@@ -85,8 +159,14 @@ class StoneDraw implements MouseListener {
             StoneColor = Color.black;
             color = 1;
         }
+
+        P nextP = GameTree(color, 1);
+        int i = nextP.i;
+        int j = nextP.j;
+
+        System.out.println("CPU: " + i + ", " + j + " : " + nextP.MAX);
+
         OmockBoard[i][j] = color;
-        
 
         Graphics g = contentPane.getGraphics();
         g.setColor(StoneColor);
@@ -107,9 +187,7 @@ class StoneDraw implements MouseListener {
         int i = (e.getX() - 10 + 15) / 30;
         int j = (e.getY() - 10 + 15) / 30;
 
-        if(OmockBoard[i][j] != -1) return;
-
-        System.out.println(i + ", " + j);
+        if(i < 0 || i >= 15 || j < 0 || j >= 15 || OmockBoard[i][j] != -1) return;
 
         int cX =  i * 30 + 10 - (STONE_SIZE / 2);
         int cY =  j * 30 + 10 - (STONE_SIZE / 2);
@@ -121,6 +199,7 @@ class StoneDraw implements MouseListener {
             StoneColor = Color.black;
             OmockBoard[i][j] = 1;
         }
+        System.out.println(i + ", " + j + " : " + scoreVarEstimation(i, j, OmockBoard[i][j]));
 
         Graphics g = contentPane.getGraphics();
         g.setColor(StoneColor);
@@ -149,8 +228,8 @@ class StoneDraw implements MouseListener {
         if(v == n) numOfNinLine++;
 
         int ld = 1; //Left Diagoanlly
-        for(int i = 1; 0 <= i+x && i+x < 15 && 0 <= i+y && i+y < 15 && c == OmockBoard[x+i][y+i]; i++) ld++;
-        for(int i = 1; 0 <= i+x && i+x < 15 && 0 <= i+y && i+y < 15 && c == OmockBoard[x-i][y-i]; i++) ld++;
+        for(int i = 1; 0 <= x+i && x+i < 15 && 0 <= y+i && y+i < 15 && c == OmockBoard[x+i][y+i]; i++) ld++;
+        for(int i = 1; 0 <= x-i && x-i < 15 && 0 <= y-i && y-i < 15 && c == OmockBoard[x-i][y-i]; i++) ld++;
         if(ld == n) numOfNinLine++;
 
         int rd = 1; //Right Diagoanlly
@@ -168,16 +247,14 @@ class StoneDraw implements MouseListener {
         int h = 1;  // Horizontally
         for(int i = x + 1; 0 <= i && i < 15; i++){
             if(c == OmockBoard[i][y]) h++;
-            else if(blank == 1){ // TODO: 이렇게 하면 다른 돌로 막혀도 체크됨
-                h++;
+            else if(blank == 1 && OmockBoard[i][y] == -1){ // TODO: 이렇게 하면 다른 돌로 막혀도 체크됨
                 blank--;
                 break;
             } else break;
         }
         for(int i = x - 1; 0 <= i && i < 15; i--){
             if(c == OmockBoard[i][y]) h++;
-            else if(blank == 1){
-                h++;
+            else if(blank == 1 && OmockBoard[i][y] == -1){
                 blank--;
                 break;
             } else break;
@@ -188,16 +265,14 @@ class StoneDraw implements MouseListener {
         int v = 1;  //Vertically
         for(int i = y + 1; 0 <= i && i < 15; i++){
             if(c == OmockBoard[x][i]) v++;
-            else if(blank == 1){
-                v++;
+            else if(blank == 1 && OmockBoard[x][i] == -1){
                 blank--;
                 break;
             } else break;
         }
         for(int i = y - 1; 0 <= i && i < 15; i--){
             if(c == OmockBoard[x][i]) v++;
-            else if(blank == 1){
-                v++;
+            else if(blank == 1 && OmockBoard[x][i] == -1){
                 blank--;
                 break;
             } else break;
@@ -208,16 +283,14 @@ class StoneDraw implements MouseListener {
         int ld = 1; //Left Diagoanlly
         for(int i = 1; 0 <= i+x && i+x < 15 && 0 <= i+y && i+y < 15; i++){
             if(c == OmockBoard[x+i][y+i]) ld++;
-            else if(blank == 1){
-                ld++;
+            else if(blank == 1 && OmockBoard[x+i][y+i] == -1){
                 blank--;
                 break;
             } else break;
         }
-        for(int i = 1; 0 <= i+x && i+x < 15 && 0 <= i+y && i+y < 15; i++){
+        for(int i = 1; 0 <= x-i && x-i < 15 && 0 <= y-i && y-i < 15; i++){
             if(c == OmockBoard[x-i][y-i]) ld++;
-            else if(blank == 1){
-                ld++;
+            else if(blank == 1 && OmockBoard[x-i][y-i] == -1){
                 blank--;
                 break;
             } else break;
@@ -228,16 +301,14 @@ class StoneDraw implements MouseListener {
         int rd = 1; //Right Diagoanlly
         for(int i = 1; 0 <= x-i && x-i < 15 && 0 <= y+i && y+i < 15; i++){
             if(c == OmockBoard[x-i][y+i]) rd++;
-            else if(blank == 1){
-                rd++;
+            else if(blank == 1 && OmockBoard[x-i][y+i] == -1){
                 blank--;
                 break;
             } else break;
         }
         for(int i = 1; 0 <= x+i && x+i < 15 && 0 <= y-i && y-i < 15; i++){
             if(c == OmockBoard[x+i][y-i]) rd++;
-            else if(blank == 1){
-                rd++;
+            else if(blank == 1 && OmockBoard[x+i][y-i] == -1){
                 blank--;
                 break;
             } else break;
@@ -254,8 +325,7 @@ class StoneDraw implements MouseListener {
         int h = 1, hb = 0;  // Horizontally
         for(int i = x + 1; 0 <= i && i < 15; i++){
             if(c == OmockBoard[i][y]) h++;
-            else if(blank == 1){ // TODO: 이렇게 하면 다른 돌로 막혀도 체크됨
-                h++;
+            else if(blank == 1 && OmockBoard[i][y] == -1){ // TODO: 이렇게 하면 다른 돌로 막혀도 체크됨
                 blank--;
                 break;
             }
@@ -266,8 +336,7 @@ class StoneDraw implements MouseListener {
         }
         for(int i = x - 1; 0 <= i && i < 15; i--){
             if(c == OmockBoard[i][y]) h++;
-            else if(blank == 1){
-                h++;
+            else if(blank == 1 && OmockBoard[i][y] == -1){
                 blank--;
                 break;
             } else if(OmockBoard[i][y] != -1){
@@ -281,8 +350,7 @@ class StoneDraw implements MouseListener {
         int v = 1, vb = 0;  //Vertically
         for(int i = y + 1; 0 <= i && i < 15; i++){
             if(c == OmockBoard[x][i]) v++;
-            else if(blank == 1){
-                v++;
+            else if(blank == 1 && OmockBoard[x][i] == -1){
                 blank--;
                 break;
             }
@@ -293,8 +361,7 @@ class StoneDraw implements MouseListener {
         }
         for(int i = y - 1; 0 <= i && i < 15; i--){
             if(c == OmockBoard[x][i]) v++;
-            else if(blank == 1){
-                v++;
+            else if(blank == 1 && OmockBoard[x][i] == -1){
                 blank--;
                 break;
             }
@@ -309,8 +376,7 @@ class StoneDraw implements MouseListener {
         int ld = 1, ldb = 0; //Left Diagoanlly
         for(int i = 1; 0 <= i+x && i+x < 15 && 0 <= i+y && i+y < 15; i++){
             if(c == OmockBoard[x+i][y+i]) ld++;
-            else if(blank == 1){
-                ld++;
+            else if(blank == 1 && OmockBoard[x+i][y+i] == -1){
                 blank--;
                 break;
             }
@@ -319,10 +385,9 @@ class StoneDraw implements MouseListener {
                 break;
             } else break;
         }
-        for(int i = 1; 0 <= i+x && i+x < 15 && 0 <= i+y && i+y < 15; i++){
+        for(int i = 1; 0 <= x-i && x-i < 15 && 0 <= y-i && y-i < 15; i++){
             if(c == OmockBoard[x-i][y-i]) ld++;
-            else if(blank == 1){
-                ld++;
+            else if(blank == 1 && OmockBoard[x-i][y-i] == -1){
                 blank--;
                 break;
             }
@@ -337,8 +402,7 @@ class StoneDraw implements MouseListener {
         int rd = 1, rdb = 0; //Right Diagoanlly
         for(int i = 1; 0 <= x-i && x-i < 15 && 0 <= y+i && y+i < 15; i++){
             if(c == OmockBoard[x-i][y+i]) rd++;
-            else if(blank == 1){
-                rd++;
+            else if(blank == 1 && OmockBoard[x-i][y+i] == -1){
                 blank--;
                 break;
             }
@@ -349,8 +413,7 @@ class StoneDraw implements MouseListener {
         }
         for(int i = 1; 0 <= x+i && x+i < 15 && 0 <= y-i && y-i < 15; i++){
             if(c == OmockBoard[x+i][y-i]) rd++;
-            else if(blank == 1){
-                rd++;
+            else if(blank == 1 && OmockBoard[x+i][y-i] == -1){
                 blank--;
                 break;
             }
@@ -373,7 +436,7 @@ class StoneDraw implements MouseListener {
      * @param b: 나열된 줄에서 막혀있는 다른 돌의 수
      * @return numOfNinLine: b개의 돌로 막혀있는 N개의 돌로 나열된 줄의 수
      */
-    public int check1BlockedNinLine(int x, int y, int c, int n, int b) {
+    public int checkBlockedNinLine(int x, int y, int c, int n, int b) {
         int numOfNinLine = 0;
 
         int h = 1, hb = 0;  // Horizontally
@@ -418,7 +481,7 @@ class StoneDraw implements MouseListener {
                 break;
             } else break;
         }
-        for(int i = 1; 0 <= i+x && i+x < 15 && 0 <= i+y && i+y < 15; i++){
+        for(int i = 1;0 <= x-i && x-i < 15 && 0 <= y-i && y-i < 15; i++){
             if(c == OmockBoard[x-i][y-i]) ld++;
             else if(OmockBoard[x-i][y-i] != -1){
                 ldb++;
@@ -478,19 +541,19 @@ public class BaseFrame extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
+    static final int STONE_SIZE = 25;
+
 
     /**
      * Launch the application.
      */
     public static void main(String[] args) {
-        EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    BaseFrame frame = new BaseFrame();
-                    frame.setVisible(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        EventQueue.invokeLater(() -> {
+            try {
+                BaseFrame frame = new BaseFrame();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -500,26 +563,25 @@ public class BaseFrame extends JFrame {
      */
     public BaseFrame() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 440, 470);
+        setBounds(100, 100, 450, 480);
         contentPane = new JPanel() {
-            public void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 g.setColor(Color.BLACK);
-
-                for(int i=10; i < 450; i+=30) {	// 10, 10 시작 | 30씩 증가
-                    g.drawLine(10, i, 450-20, i);
-                    g.drawLine(i, 10, i, 450-20);
+                for (int i = 10; i <= 430; i += 30) {
+                    g.drawLine(10, i, 430, i);
+                    g.drawLine(i, 10, i, 430);
                 }
+
+                int cX =  7 * 30 + 10 - (STONE_SIZE / 2);
+                int cY =  7 * 30 + 10 - (STONE_SIZE / 2);
+
+                g.fillOval(cX, cY, STONE_SIZE, STONE_SIZE);
             }
         };
         contentPane.setBackground(new Color(184, 134, 11));
-
         contentPane.addMouseListener(new StoneDraw(contentPane));
-
-//		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-
         setContentPane(contentPane);
-//		contentPane.setLayout(new BorderLayout(0, 0));
     }
-
 }
