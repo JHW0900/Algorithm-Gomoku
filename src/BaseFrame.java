@@ -1,4 +1,4 @@
-import com.sun.tools.javac.util.Pair;
+import javafx.util.Pair;
 
 import java.awt.EventQueue;
 import java.awt.Graphics;
@@ -173,7 +173,7 @@ public class BaseFrame extends JFrame {
     // 보드 초기화
     void initBoard(){
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 450, 480);
+        setBounds(100, 100, 460,  510);
         contentPane = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
