@@ -1,4 +1,5 @@
-import javafx.util.Pair;
+package com.jhw0900.gomoku;
+
 import java.util.List;
 
 public class CalcWeight {
@@ -47,7 +48,7 @@ public class CalcWeight {
         emptyPositions = Board.getLegalMoves();
 
         for(Pair<Integer, Integer> p : emptyPositions){
-            int cx = p.getKey(), cy = p.getValue();
+            int cx = p.getFirst(), cy = p.getSecond();
             if(Board.isValidPosition(cx, cy) && board[cx][cy] == Board.EMPTY){
                 board[cx][cy] = turn;
 
@@ -83,7 +84,7 @@ public class CalcWeight {
         P cNode = new P();
 
         for(Pair<Integer, Integer> p : emptyPositions){
-            int cx = p.getKey(), cy = p.getValue();
+            int cx = p.getFirst(), cy = p.getSecond();
             if(Board.isValidPosition(cx, cy) && board[cx][cy] == Board.EMPTY){
                 board[cx][cy] = turn;  // Black = 1, White = 2
 
@@ -105,7 +106,7 @@ public class CalcWeight {
         P cNode = new P();
 
         for(Pair<Integer, Integer> p : emptyPositions){
-            int cx = p.getKey(), cy = p.getValue();
+            int cx = p.getFirst(), cy = p.getSecond();
             if(Board.isValidPosition(cx, cy) && board[cx][cy] == Board.EMPTY){
                 board[cx][cy] = turn;
                 // 1. 게임 트리 생성 Top-Down

@@ -1,4 +1,4 @@
-import javafx.util.Pair;
+package com.jhw0900.gomoku;
 
 import java.awt.EventQueue;
 import java.awt.Graphics;
@@ -61,7 +61,7 @@ class Board implements MouseListener {
 
         board[x][y] = curTurn;
 
-//        CalcWeight.isGameOver(board);
+//        com.jhw0900.gomoku.CalcWeight.isGameOver(board);
 
         int cx =  x * 30 + 10 - (STONE_SIZE / 2);
         int cy =  y * 30 + 10 - (STONE_SIZE / 2);
