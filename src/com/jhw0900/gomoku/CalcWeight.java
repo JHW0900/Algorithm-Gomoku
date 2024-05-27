@@ -96,6 +96,11 @@ public class CalcWeight {
                 if(cNode.MAX < tmp.MIN) cNode.MAX = tmp.MIN;
 
                 board[cx][cy] = Board.EMPTY;
+
+                if (beta <= alpha) {
+                    return cNode; // 베타 컷
+                }
+                alpha = (int) Math.max(alpha, cNode.MAX);
             }
         }
         return cNode;
@@ -124,6 +129,12 @@ public class CalcWeight {
                 // 2. 최저 점수 반환 Bottom-Up
                 if(cNode.MIN > tmp.MAX) cNode.MIN = tmp.MAX;
                 board[cx][cy] = Board.EMPTY;
+
+                // 알파-베타 가지치기
+                if (cNode.MIN <= alpha) {
+                    return cNode; // 알파 컷오프
+                }
+                beta = (int)Math.min(beta, cNode.MIN);
             }
         }
         return cNode;
