@@ -57,7 +57,7 @@ public class CalcWeight {
                 if(curScore >= 100_000 && offPos.MAX < curScore){
                     offPos = new P(cx, cy, -1, curScore, true);
                 }
-                P tmp = getMiniPosition(3 - turn, cx, cy, DEPTH - 1, Integer.MIN_VALUE, Integer.MAX_VALUE, curScore);
+                P tmp = getMiniPosition(3 - turn, cx, cy, DEPTH - 1, Float.MIN_VALUE, Float.MAX_VALUE, curScore);
 
                 // 2. 최고 점수 반환 Bottom-Up
                 board[cx][cy] = Board.EMPTY;
