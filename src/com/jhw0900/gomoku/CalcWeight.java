@@ -97,6 +97,7 @@ public class CalcWeight {
 
                 board[cx][cy] = Board.EMPTY;
 
+                // 알파-베타 가지치기
                 if (beta <= alpha) {
                     return cNode; // 베타 컷
                 }
