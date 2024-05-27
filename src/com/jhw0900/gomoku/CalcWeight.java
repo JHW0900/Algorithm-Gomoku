@@ -101,7 +101,7 @@ public class CalcWeight {
                 if (beta <= alpha) {
                     return cNode; // 베타 컷
                 }
-                alpha = (int) Math.max(alpha, cNode.MAX);
+                alpha = Math.max(alpha, cNode.MAX);
             }
         }
         return cNode;
@@ -135,7 +135,7 @@ public class CalcWeight {
                 if (cNode.MIN <= alpha) {
                     return cNode; // 알파 컷오프
                 }
-                beta = (int)Math.min(beta, cNode.MIN);
+                beta = Math.min(beta, cNode.MIN);
             }
         }
         return cNode;
