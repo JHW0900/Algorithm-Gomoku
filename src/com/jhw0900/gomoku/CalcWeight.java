@@ -79,7 +79,7 @@ public class CalcWeight {
         return bestPosition;
     }
 
-    public static P getMaxPosition(int turn, int x, int y, int depth, int alpha, int beta, float score){
+    public static P getMaxPosition(int turn, int x, int y, int depth, float alpha, float beta, float score){
         if(depth == 0 || Board.isWinner(x, y, turn)) return new P(x, y, -1, score);
         P cNode = new P();
 
@@ -107,7 +107,7 @@ public class CalcWeight {
         return cNode;
     }
 
-    public static P getMiniPosition(int turn, int x, int y, int depth, int alpha, int beta, float score){
+    public static P getMiniPosition(int turn, int x, int y, int depth, float alpha, float beta, float score){
         if(depth == 0 || Board.isWinner(x, y, turn)) return new P(x, y, score, -1);
         P cNode = new P();
 
