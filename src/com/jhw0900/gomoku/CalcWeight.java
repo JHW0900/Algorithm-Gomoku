@@ -5,7 +5,7 @@ import java.util.List;
 public class CalcWeight {
     static int [][]board;
     static List<Pair<Integer, Integer>> emptyPositions;
-    static final int DEPTH = 3;
+    static final int DEPTH = 4;
 
     static P offPos = new P();
     static P defPos = new P();
@@ -14,7 +14,7 @@ public class CalcWeight {
         int x, y;
         boolean defense = false;
         float MIN = Float.MAX_VALUE;
-        float MAX = Float.MIN_VALUE;
+        float MAX = -Float.MAX_VALUE;
 
         public P(){ }
         public P(int _x, int _y, float minScore, float maxScore){
@@ -57,7 +57,7 @@ public class CalcWeight {
                 if(curScore >= 100_000 && offPos.MAX < curScore){
                     offPos = new P(cx, cy, -1, curScore, true);
                 }
-                P tmp = getMiniPosition(3 - turn, cx, cy, DEPTH - 1, Float.MIN_VALUE, Float.MAX_VALUE, curScore);
+                P tmp = getMiniPosition(3 - turn, cx, cy, DEPTH - 1, -Float.MAX_VALUE, Float.MAX_VALUE, curScore);
 
                 // 2. 최고 점수 반환 Bottom-Up
                 board[cx][cy] = Board.EMPTY;
