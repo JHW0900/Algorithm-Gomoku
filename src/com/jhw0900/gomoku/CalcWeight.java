@@ -98,7 +98,7 @@ public class CalcWeight {
                 board[cx][cy] = Board.EMPTY;
 
                 // 알파-베타 가지치기
-                if (beta <= alpha) {
+                if (beta <= cNode.MAX) {
                     return cNode; // 베타 컷
                 }
                 alpha = Math.max(alpha, cNode.MAX);
@@ -131,7 +131,6 @@ public class CalcWeight {
                 if(cNode.MIN > tmp.MAX) cNode.MIN = tmp.MAX;
                 board[cx][cy] = Board.EMPTY;
 
-                // 알파-베타 가지치기
                 if (cNode.MIN <= alpha) {
                     return cNode; // 알파 컷오프
                 }
