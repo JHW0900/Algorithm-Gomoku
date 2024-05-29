@@ -58,7 +58,7 @@ public class CalcWeight {
                 float defScore = getScoreEstimation(3 - turn, cx, cy);
                 if(curScore >= 500_000 || defScore >= 500_000){
                     board[cx][cy] = Board.EMPTY;
-                    return new P(cx, cy, -1, curScore, true);
+                    return new P(cx, cy, -1, curScore);
                 }
                 curScore += (defScore / 2);
                 if(curScore >= 100_000 && offPos.MAX < curScore){
@@ -99,11 +99,15 @@ public class CalcWeight {
                 board[cx][cy] = turn;  // Black = 1, White = 2
 
                 // 1. 게임 트리 생성 Top-Down
-                float curScore = score + getScoreEstimation(turn, cx, cy);
-                // 상대편이 유리한 수를 막았을 때, 추가 점수 부여
-                curScore += (getScoreEstimation(3 - turn, cx, cy) / 2);
+                float curScore = getScoreEstimation(turn, cx, cy);
+                float defScore = getScoreEstimation(3 - turn, cx, cy);
+                if(curScore >= 500_000 || defScore >= 500_000){
+                    board[cx][cy] = Board.EMPTY;
+                    return new P(cx, cy, -1, curScore);
+                }
+                curScore += (defScore / 2);
 
-                P tmp = getMiniPosition(3 - turn, cx, cy, depth - 1, alpha, beta, curScore);
+                P tmp = getMiniPosition(3 - turn, cx, cy, depth - 1, alpha, beta, score + curScore);
 
                 // 2. 최고 점수 반환 Bottom-Up
                 if(cNode.MAX < tmp.MIN) cNode.MAX = tmp.MIN;
@@ -127,10 +131,17 @@ public class CalcWeight {
                 board[cx][cy] = turn;
                 // 1. 게임 트리 생성 Top-Down
                 float curScore = getScoreEstimation(turn, cx, cy);
-                curScore += (getScoreEstimation(3 - turn, cx, cy) / 2);
+                float defScore = getScoreEstimation(3 - turn, cx, cy);
+                if(curScore >= 500_000 || defScore >= 500_000){
+                    board[cx][cy] = Board.EMPTY;
+                    return new P(cx, cy, curScore, -1);
+                }
+                curScore += (defScore / 2);
 
                 if(curScore >= 100_000 && depth == (DEPTH - 1) && defPos.MIN > (-1) * (curScore)){
+                    board[cx][cy] = Board.EMPTY;
                     defPos = new P(cx, cy, (-1) * (curScore), -1, true);
+                    continue;
                 }
 
                 P tmp = getMaxPosition(3 - turn, cx, cy, depth - 1, alpha, beta, score - curScore);

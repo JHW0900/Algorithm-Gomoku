@@ -66,8 +66,6 @@ class Board implements MouseListener {
 
         board[x][y] = curTurn;
 
-//        com.jhw0900.gomoku.CalcWeight.isGameOver(board);
-
         int cx =  x * 30 + 10 - (STONE_SIZE / 2);
         int cy =  y * 30 + 10 - (STONE_SIZE / 2);
 
@@ -151,7 +149,6 @@ class Board implements MouseListener {
         int y = (e.getY() - 10 + 15) / 30;
 
         if(!drawStone(x, y)) return;
-//        drawStone(x, y);
         AIStoneDraw();
     }
     @Override
@@ -212,10 +209,11 @@ public class BaseFrame extends JFrame {
                     }
                 }
 
-                int cx =  curAiPosX * 30 + 10 - (STONE_SIZE / 6);
-                int cy =  curAiPosY * 30 + 10 - (STONE_SIZE / 6);
+                int cx =  curAiPosX * 30 + 10 - (STONE_SIZE / 8);
+                int cy =  curAiPosY * 30 + 10 - (STONE_SIZE / 8);
+
                 g.setColor(Color.RED);
-                g.fillOval(cx, cy, STONE_SIZE / 3, STONE_SIZE / 3);
+                g.fillOval(cx, cy, STONE_SIZE / 4, STONE_SIZE / 4);
             }
         };
         contentPane.setBackground(new Color(184, 134, 11));
