@@ -252,10 +252,11 @@ public class CalcWeight {
         // 1막 3x4 or 4x3
         else if((oneEndThree == 1) && (openBlFour == 1 || openFour == 1)) return 135_000;
         else if((oneEndFour == 1) && (openBlThree == 1 || openThree == 1)) return 135_000;
-        // 3x3
-        else if((openThree >= 1 || openBlThree >= 1) && (openBlThree + openThree) >= 2) return 130_000;
         // 4
-        else if(openFour == 1) return 100_000;
+        else if(openFour == 1) return 130_000;
+        // 3x3
+        else if((openThree >= 1 || openBlThree >= 1) && (openBlThree + openThree) >= 2) return 100_000;
+
 
         return score;
     }
