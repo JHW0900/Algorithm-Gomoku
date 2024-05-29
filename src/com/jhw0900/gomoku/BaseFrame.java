@@ -11,16 +11,21 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.jhw0900.gomoku.Board.curAiPosX;
+import static com.jhw0900.gomoku.Board.curAiPosY;
+
 class Board implements MouseListener {
-    JPanel contentPane = null;
+    static JPanel contentPane = null;
     static Color StoneColor = Color.BLACK;  // CPU is Black
 
     static final int STONE_SIZE = 25;
     static final int BOARD_SIZE = 15;
     static final int EMPTY = 0, BLACK = 1, WHITE = 2;
-    int turnCount = 0;
+    static int turnCount = 0;
 
     static int curTurn = BLACK;
+    static int curAiPosX;
+    static int curAiPosY;
 
     static int[][] board = new int[BOARD_SIZE][BOARD_SIZE];
 
@@ -54,7 +59,7 @@ class Board implements MouseListener {
     }
 
     // 돌 착수
-    public boolean drawStone(int x, int y){
+    public static boolean drawStone(int x, int y){
         System.out.println(x + " : " + y + " : " + board[x][y]);
 
         if(x < 0 || x >= 15 || y < 0 || y >= 15 || board[x][y] != EMPTY) return false;
@@ -119,7 +124,7 @@ class Board implements MouseListener {
     }
 
     // AI의 차례
-    public void AIStoneDraw(){
+    public static void AIStoneDraw(){
         int x = 6;
         int y = 6;
 
@@ -128,6 +133,9 @@ class Board implements MouseListener {
             x = nextP.x;
             y = nextP.y;
         }
+
+        curAiPosX = x;
+        curAiPosY = y;
 
         drawStone(x, y);
     }
@@ -199,6 +207,11 @@ public class BaseFrame extends JFrame {
                         }
                     }
                 }
+
+                int cx =  curAiPosX * 30 + 10 - (STONE_SIZE / 6);
+                int cy =  curAiPosY * 30 + 10 - (STONE_SIZE / 6);
+                g.setColor(Color.RED);
+                g.fillOval(cx, cy, STONE_SIZE / 3, STONE_SIZE / 3);
             }
         };
         contentPane.setBackground(new Color(184, 134, 11));

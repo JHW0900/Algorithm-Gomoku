@@ -56,7 +56,10 @@ public class CalcWeight {
                 // 1. 게임 트리 생성 Top-Down
                 float curScore = getScoreEstimation(turn, cx, cy);
                 float defScore = getScoreEstimation(3 - turn, cx, cy);
-                if(curScore >= 500_000 || defScore >= 500_000) return new P(cx, cy, -1, curScore, true);
+                if(curScore >= 500_000 || defScore >= 500_000){
+                    board[cx][cy] = Board.EMPTY;
+                    return new P(cx, cy, -1, curScore, true);
+                }
                 curScore += (defScore / 2);
                 if(curScore >= 100_000 && offPos.MAX < curScore){
                     offPos = new P(cx, cy, -1, curScore, true);
