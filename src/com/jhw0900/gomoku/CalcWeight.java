@@ -40,6 +40,7 @@ public class CalcWeight {
 
     public static P gameTree(int turn){
         P bestPosition = new P();
+        float alpha = -Float.MAX_VALUE;
 
         offPos = new P();
         defPos = new P();
@@ -57,7 +58,7 @@ public class CalcWeight {
                 if(curScore >= 100_000 && offPos.MAX < curScore){
                     offPos = new P(cx, cy, -1, curScore, true);
                 }
-                P tmp = getMiniPosition(3 - turn, cx, cy, DEPTH - 1, -Float.MAX_VALUE, Float.MAX_VALUE, curScore);
+                P tmp = getMiniPosition(3 - turn, cx, cy, DEPTH - 1, alpha, Float.MAX_VALUE, curScore);
 
                 // 2. 최고 점수 반환 Bottom-Up
                 board[cx][cy] = Board.EMPTY;
@@ -66,6 +67,8 @@ public class CalcWeight {
                     bestPosition.x = cx;
                     bestPosition.y = cy;
                 }
+
+                alpha = Math.max(alpha, bestPosition.MAX);
             }
         }
 
@@ -94,13 +97,10 @@ public class CalcWeight {
 
                 // 2. 최고 점수 반환 Bottom-Up
                 if(cNode.MAX < tmp.MIN) cNode.MAX = tmp.MIN;
-
                 board[cx][cy] = Board.EMPTY;
 
                 // 알파-베타 가지치기
-                if (beta <= cNode.MAX) {
-                    return cNode; // 베타 컷
-                }
+                if (beta <= cNode.MAX) return cNode; // 베타 컷
                 alpha = Math.max(alpha, cNode.MAX);
             }
         }
@@ -131,9 +131,7 @@ public class CalcWeight {
                 if(cNode.MIN > tmp.MAX) cNode.MIN = tmp.MAX;
                 board[cx][cy] = Board.EMPTY;
 
-                if (cNode.MIN <= alpha) {
-                    return cNode; // 알파 컷오프
-                }
+                if (cNode.MIN <= alpha) return cNode; // 알파 컷오프
                 beta = Math.min(beta, cNode.MIN);
             }
         }
