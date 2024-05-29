@@ -74,6 +74,7 @@ class Board implements MouseListener {
         Graphics g = contentPane.getGraphics();
         g.setColor(StoneColor);
         g.fillOval(cx, cy, STONE_SIZE, STONE_SIZE);
+
         if(isWinner(x, y, curTurn)){
             JOptionPane.showMessageDialog(contentPane, (curTurn == BLACK ? "Black" : "White") + " Win!");
         }
@@ -141,12 +142,6 @@ class Board implements MouseListener {
         curAiPosY = y;
 
         drawStone(x, y);
-        if(isWinner(x,y,curTurn)){
-            String color = "";
-            if(curTurn ==1)color="Black Win";
-            else if(curTurn == 2)color="White Win";
-            JOptionPane.showMessageDialog(null, color);
-        }
     }
 
     // 사용자의 차례
@@ -157,13 +152,6 @@ class Board implements MouseListener {
 
         if(!drawStone(x, y)) return;
 //        drawStone(x, y);
-        if(isWinner(x,y,3-curTurn)){
-            String color = "";
-            if(3-curTurn ==1)color="Black Win";
-            else if(3-curTurn == 2)color="White Win";
-            JOptionPane.showMessageDialog(null, color);
-        }
-
         AIStoneDraw();
     }
     @Override
