@@ -55,6 +55,9 @@ public class CalcWeight {
 
                 // 1. 게임 트리 생성 Top-Down
                 float curScore = getScoreEstimation(turn, cx, cy);
+                float defScore = getScoreEstimation(3 - turn, cx, cy);
+                if(curScore >= 500_000 || defScore >= 500_000) return new P(cx, cy, -1, curScore, true);
+                curScore += (defScore / 2);
                 if(curScore >= 100_000 && offPos.MAX < curScore){
                     offPos = new P(cx, cy, -1, curScore, true);
                 }
@@ -72,7 +75,8 @@ public class CalcWeight {
             }
         }
 
-        if(offPos.defense && defPos.defense){
+        if(offPos.MAX >= 500_000) return offPos;
+        else if(offPos.defense && defPos.defense){
             if(offPos.MAX >= (-1) * (defPos.MIN)) return offPos;
             else return defPos;
         }
@@ -93,6 +97,9 @@ public class CalcWeight {
 
                 // 1. 게임 트리 생성 Top-Down
                 float curScore = score + getScoreEstimation(turn, cx, cy);
+                // 상대편이 유리한 수를 막았을 때, 추가 점수 부여
+                curScore += (getScoreEstimation(3 - turn, cx, cy) / 2);
+
                 P tmp = getMiniPosition(3 - turn, cx, cy, depth - 1, alpha, beta, curScore);
 
                 // 2. 최고 점수 반환 Bottom-Up
@@ -117,10 +124,8 @@ public class CalcWeight {
                 board[cx][cy] = turn;
                 // 1. 게임 트리 생성 Top-Down
                 float curScore = getScoreEstimation(turn, cx, cy);
+                curScore += (getScoreEstimation(3 - turn, cx, cy) / 2);
 
-                if(depth == (DEPTH - 1) && cx == 12 && cy == 8){
-                    board[cx][cy] = turn;
-                }
                 if(curScore >= 100_000 && depth == (DEPTH - 1) && defPos.MIN > (-1) * (curScore)){
                     defPos = new P(cx, cy, (-1) * (curScore), -1, true);
                 }
@@ -144,6 +149,7 @@ public class CalcWeight {
         int []dx = {1, 0, 1, 1};
         int []dy = {0, 1, 1, -1};
 
+        int openTwo = 0;
         int openThree = 0;
         int openFour = 0;
 
@@ -203,7 +209,7 @@ public class CalcWeight {
             if(Board.isValidPosition(x - steps * dx[i], y - steps * dy[i]) && board[x - steps * dx[i]][y - steps * dy[i]] == Board.EMPTY) openEnds++;
 
             if(blankGuard > 0){
-                if(count == 5) return 200_000;
+                if(count == 5) return 500_000;
                 if(count == 4 && openEnds == 2) {
                     openFour++;
                     score += 100_000;
@@ -219,6 +225,10 @@ public class CalcWeight {
                 else if(count == 3 && openEnds == 1) {
                     oneEndThree++;
                     score += (5 * count);
+                }
+                else if(count == 2 && openEnds == 2){
+                    openTwo++;
+                    score += (10 * count);
                 }
                 else if(openEnds == 2) score += (10 * count);
                 else if(openEnds == 1) score += (5 * count);
@@ -248,15 +258,22 @@ public class CalcWeight {
         // 4x4
         if(openFour == 2 || (openBlFour == 1 && openFour == 1) || openBlFour == 2) return 170_000;
         // 4x3
-        else if((openFour == 1 || openBlFour == 1) && (openFour + openBlFour + openBlThree + openThree) >= 2) return 150_000;
-        // 1막 3x4 or 4x3
-        else if((oneEndThree == 1) && (openBlFour == 1 || openFour == 1)) return 135_000;
-        else if((oneEndFour == 1) && (openBlThree == 1 || openThree == 1)) return 135_000;
+        else if((openFour == 1) && (openFour + openThree) >= 2) return 150_000;
         // 4
-        else if(openFour == 1) return 130_000;
+        else if(openFour == 1) return 135_000;
+        // 1Bl 3x4 or 4x3
+        else if((openBlFour == 1 || openBlThree == 1) && (openFour + openBlThree) >= 2 || (openBlFour + openThree) >= 2) return 132_000;
+        // 1막 3x4 or 4x3
+        else if((oneEndThree == 1) && (openBlFour == 1 || openFour == 1)) return 130_000;
+        else if((oneEndFour == 1) && (openBlThree == 1 || openThree == 1)) return 130_000;
+        // 1막 4 x 1막 4
+        else if(oneEndFour == 2) return 110_000;
+        // 1막 3 x 1막 4
+        else if((oneEndFour == 1) && (oneEndThree == 1)) return 110_000;
         // 3x3
         else if((openThree >= 1 || openBlThree >= 1) && (openBlThree + openThree) >= 2) return 100_000;
-
+        // 3x2
+        //else if((openThree == 1 || openTwo == 1)) return 80_000;
 
         return score;
     }
